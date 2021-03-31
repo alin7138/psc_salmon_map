@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Fish Barriers</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.2.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.2.0/mapbox-gl.js"></script>
+    <script src='culverts.js'></script>
+    <script src='dams.js'></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+        .legend {
+        background-color: #fff;
+        border-radius: 3px;
+        bottom: 30px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+        padding: 10px;
+        position: absolute;
+        left: 10px;
+        z-index: 1;
+        width: 80px;
+        }
+        
+        .legend h4 {
+        margin: 0 0 10px;
+        }
+        
+        .legend div span {
+        border-radius: 50%;
+        display: inline-block;
+        height: 10px;
+        margin-right: 5px;
+        width: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <div id="county-legend" class="legend" style="display: none">
+        <h3>Legend</h3>
+        <div><span style="background-color: #F4D03F"></span>Culverts</div>
+        <div><span style="background-color: #E74C3C"></span>Dams</div>
+        </div>
+
+    <script>
+        mapboxgl.accessToken =
+            'pk.eyJ1IjoiYWxpbjcxMzgiLCJhIjoiY2s5bHhzM2p5MDNuajNrbnFxZW5yd3RmZyJ9.bnOBSehlyZ1_URBS8zlKEg';
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/alin7138/ckls9hnhw19au17o86le65zws',
+            zoom: 3,
+            center: [-140, 59],
+            interactive: true
+        });
+
+        map.on('load', function () {
+            // Add a new source from our GeoJSON data and
+            // set the 'cluster' option to true. GL-JS will
+            // add the point_count property to your source data.
+            map.addSource('earthquakes', {
+                type: 'geojson',
+                // Point to GeoJSON data. This example visualizes all M1.0+ earthquakes
+                // from 12/22/15 to 1/21/16 as logged by USGS' Earthquake hazards program.
+                data: culverts,
+                cluster: true,
+                clusterMaxZoom: 14, // Max zoom to cluster points on
+                clusterRadius: 50 // Radius of each cluster when clustering points (defaults to 50)
+            });
+            var layers = map.getStyle().layers;
+            var labels = layers[79].id
+            map.addLayer({
+                id: 'clusters',
+                type: 'circle',
+                source: 'earthquakes',
+                filter: ['has', 'point_count'],
+                paint: {
+                    // Use step expressions (https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions-step)
+                    // with three steps to implement three types of circles:
+                    //   * Blue, 20px circles when point count is less than 100
+                    //   * Yellow, 30px circles when point count is between 100 and 750
+                    //   * Pink, 40px circles when point count is greater than or equal to 750
+                    'circle-color': '#F4D03F',
+                    'circle-stroke-width': 1,
+                    'circle-stroke-color': '#FCF3CF',
+                    'circle-radius': [
+                        'step',
+                        ['get', 'point_count'],
+                        8,
+                        10,
+                        15,
+                        50,
+                        20,
+                        500,
+                        25,
+                        1000,
+                        35
+                    ]
+                }
+            }, labels);
+
+            map.addLayer({
+                id: 'cluster-count',
+                type: 'symbol',
+                source: 'earthquakes',
+                filter: ['has', 'point_count'],
+                layout: {
+                    'text-field': '{point_count_abbreviated}',
+                    'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+                    'text-size': 12
+                }
+            }, labels);
+
+            map.addLayer({
+                id: 'unclustered-point',
+                type: 'circle',
+                source: 'earthquakes',
+                filter: ['!', ['has', 'point_count']],
+                paint: {
+                    'circle-color': '#F4D03F',
+                    'circle-radius': 6,
+                    'circle-stroke-width': 1,
+                    'circle-stroke-color': '#FCF3CF'
+                }
+            }, labels);
+
+
+            map.addSource('points', {
+                'type': 'geojson',
+                'data': dams,
+                'cluster': true,
+                clusterMaxZoom: 14, // Max zoom to cluster points on
+                clusterRadius: 50 // Radius of each cluster when clustering points (defaults to 50)
+            });
+
+            map.addLayer({
+                id: 'dam-clusters',
+                type: 'circle',
+                source: 'points',
+                filter: ['has', 'point_count'],
+                paint: {
+                    // Use step expressions (https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions-step)
+                    // with three steps to implement three types of circles:
+                    //   * Blue, 20px circles when point count is less than 100
+                    //   * Yellow, 30px circles when point count is between 100 and 750
+                    //   * Pink, 40px circles when point count is greater than or equal to 750
+                    'circle-color': '#E74C3C',
+                    'circle-stroke-width': 1,
+                    'circle-stroke-color': '#FCF3CF',
+                    'circle-radius': [
+                        'step',
+                        ['get', 'point_count'],
+                        7,
+                        5,
+                        9,
+                        10,
+                        11,
+                        15,
+                        13
+                    ]
+                }
+            }, labels);
+
+            map.addLayer({
+                id: 'dam-cluster-count',
+                type: 'symbol',
+                source: 'points',
+                filter: ['has', 'point_count'],
+                layout: {
+                    'text-field': '{point_count_abbreviated}',
+                    'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+                    'text-size': 12,
+                },
+                paint: {
+                    'text-color': '#FDEDEC'
+                }
+            }, labels);
+
+            map.addLayer({
+                id: 'dam-unclustered-point',
+                type: 'circle',
+                source: 'points',
+                filter: ['!', ['has', 'point_count']],
+                paint: {
+                    'circle-color': '#E74C3C',
+                    'circle-radius': 4,
+                    'circle-stroke-width': 1,
+                    'circle-stroke-color': '#FCF3CF'
+                }
+            }, labels);
+
+            // map.loadImage(
+            //     'https://raw.githubusercontent.com/alin7138/psc_data/main/dam-15.png',
+            //     function (error, image) {
+            //         if (error) throw error;
+            //         map.addImage('custom-marker', image);
+            //         // Add a GeoJSON source with 2 points
+            //         map.addSource('points', {
+            //             'type': 'geojson',
+            //             'data': dams,
+            //             'cluster': false
+            //         });
+
+            //         // Add a symbol layer
+            //         map.addLayer({
+            //             'id': 'points',
+            //             'type': 'symbol',
+            //             'source': 'points',
+            //             'layout': {
+            //                 'icon-image': 'custom-marker',
+            //                 'icon-size': 0.7
+            //             }
+            //         });
+            //     }
+            // );
+
+
+            var countyLegendEl = document.getElementById('county-legend');
+            countyLegendEl.style.display = 'block'
+
+        })
+    </script>
+
+</body>
+
+</html>
