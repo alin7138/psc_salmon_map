@@ -1,0 +1,38 @@
+<html>
+<head>
+  <title>Salmon Distribution</title>
+  <script src='https://d3js.org/d3.v4.min.js'></script>
+  <script src='chinook_v2.js'></script>
+</head>
+<body>
+  <style>.embed-container {position: relative; padding-bottom: 80%; height: 0; max-width: 100%;} .embed-container iframe, .embed-container object, .embed-container iframe{position: absolute; top: 0; left: 0; width: 100%; height: 100%;} small{position: absolute; z-index: 40; bottom: 0; margin-bottom: -15px;}</style><div class="embed-container"><iframe width="500" height="400" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" title="FWF Survey Results" src="//eartheconomics.maps.arcgis.com/apps/Embed/index.html?webmap=ebbbceda229140e0bde6a03f428ecfd0&extent=-83.2527,42.2773,-82.8675,42.4303&zoom=true&previewImage=false&scale=true&disable_scroll=true&theme=dark"></iframe></div>
+  <!-- <script>
+var width = 700,
+    height = 1080;
+
+var svg = d3.select('body')
+  .append('svg')
+  .attr('width', width)
+  .attr('height', height);
+
+var g = svg.append('g');
+
+var albersProjection = d3.geoAlbers()
+  .scale(1100)
+  .rotate([125, 0])
+  .center([0, 120])
+  //.translate([width/2, height/2]);
+
+var geoPath = d3.geoPath()
+    .projection(albersProjection);
+
+g.selectAll('path')
+  .data(data.features)
+  .enter()
+  .append('path')
+  .attr('fill', '#ccc')
+  .attr('d', geoPath);
+
+  </script> -->
+</body>
+</html>

@@ -1,0 +1,665 @@
+<html>
+
+<head>
+    <title>Salmon Distribution</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.js"></script>
+    <script src='sos_data.js'></script>
+    <script src='culverts_dams_basins.js'></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map1 {
+            position: absolute;
+            left: 0;
+            top: 45;
+            bottom: 0;
+            width: 100%;
+        }
+
+        #map2 {
+            position: absolute;
+            left: 0;
+            top: 45;
+            bottom: 0;
+
+        }
+
+        #map3 {
+            position: absolute;
+            left: 0;
+            top: 45;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+    <style>
+        .mapboxgl-popup {
+            min-width: 300px;
+            font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+        }
+
+        #menu {
+            background: #fff;
+            position: absolute;
+            z-index: 1;
+            top: 60px;
+            right: 10px;
+            border-radius: 3px;
+            width: 100px;
+            border: 1px solid rgba(0, 0, 0, 0.4);
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        #menu a {
+            font-size: 13px;
+            color: #404040;
+            display: block;
+            margin: 0;
+            padding: 0;
+            padding: 10px;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+            text-align: center;
+        }
+
+        #menu a:last-child {
+            border: none;
+        }
+
+        #menu a:hover {
+            background-color: #f8f8f8;
+            color: #404040;
+        }
+
+        #menu a.active {
+            background-color: #3887be;
+            color: #ffffff;
+        }
+
+        #menu a.active:hover {
+            background: #3074a4;
+        }
+
+        .legend {
+            background-color: #fff;
+            border-radius: 3px;
+            bottom: 30px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+            padding: 10px;
+            position: absolute;
+            left: 20px;
+            z-index: 1;
+        }
+
+        .legend h4 {
+            margin: 0 0 10px;
+        }
+
+        .legend div span {
+            border-radius: 50%;
+            display: inline-block;
+            height: 10px;
+            margin-right: 5px;
+            width: 10px;
+        }
+
+    </style>
+        <div>
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab"
+                        aria-controls="home" aria-selected="true"> Salmon Distribution</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab"
+                        aria-controls="profile" aria-selected="false">Fish Barriers</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab"
+                        aria-controls="contact" aria-selected="false">Quotes</a>
+                </li>
+            </ul>
+        </div>
+        <div>
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                    <div class = 'row' id='map1'></div>
+                </div>
+                <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                    <div class = 'container' id='map2'></div>
+                </div>
+                <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+                    <div id='map3'></div>
+                </div>
+            </div>
+        </div>
+
+        <nav id="menu"></nav>
+
+        <div id="county-legend" class="legend" style="display: none">
+            <h4>Legend</h4>
+            <div><span style="background-color: #41A3EC"></span>Current spawning distribution</div>
+            <div><span style="background-color: #F3C251"></span>Limited spawning distribution</div>
+            <div><span style="background-color: #D54B86"></span>Historic spawning distribution</div>
+        </div>
+
+        <div id="barrier-legend" class="legend" style="display: none">
+            <h3>Legend</h3>
+            <h4>Number of manmade fish barriers<br> (dams and culverts)</h4>
+            <div><span style="background-color: #9b9b9b"></span>No data (Yukon Province)</div>
+            <div><span style="background-color: #45327f"></span>0-75</div>
+            <div><span style="background-color: #365c8d"></span>76-250</div>
+            <div><span style="background-color: #277f8e"></span>251-600</div>
+            <div><span style="background-color: #1fa288"></span>601-1,200</div>
+            <div><span style="background-color: #4ac26d"></span>1,201-2,400</div>
+            <div><span style="background-color: #9eda39"></span>2,401-4,000</div>
+        </div>
+
+
+        <script>
+            mapboxgl.accessToken =
+                'pk.eyJ1IjoiYWxpbjcxMzgiLCJhIjoiY2s5bHhzM2p5MDNuajNrbnFxZW5yd3RmZyJ9.bnOBSehlyZ1_URBS8zlKEg';
+            var bounds = [
+                [-110.2, 35.2], // Southwest coordinates
+                [-174, 72.1] // Northeast coordinates
+            ];
+            var map1 = new mapboxgl.Map({
+                container: 'map1',
+                style: 'mapbox://styles/alin7138/ckls9hnhw19au17o86le65zws',
+                zoom: 2,
+                maxBounds: bounds,
+                interactive: false
+            });
+
+            var map2 = new mapboxgl.Map({
+                container: 'map2',
+                style: 'mapbox://styles/alin7138/ckls9hnhw19au17o86le65zws',
+                zoom: 2,
+                maxBounds: bounds,
+                interactive: false
+            });
+
+            var map3 = new mapboxgl.Map({
+                container: 'map3',
+                style: 'mapbox://styles/alin7138/ckls9hnhw19au17o86le65zws',
+                zoom: 2,
+                maxBounds: bounds,
+                interactive: false
+            });
+
+            var attributes = [{
+                    'OBJECTID': 1,
+                    'col': 'rgba(0, 0, 0, 0)'
+                },
+                {
+                    'OBJECTID': 2,
+                    'col': 'rgb(65, 163, 236)'
+                },
+                {
+                    'OBJECTID': 3,
+                    'col': 'rgb(213, 75, 134)'
+                },
+                {
+                    'OBJECTID': 4,
+                    'col': '#F3C251'
+                }
+            ];
+
+            var attributes_barriers = [{
+                    'KEY': 1,
+                    'col': '#45327f'
+                },
+                {
+                    'KEY': 2,
+                    'col': '#365c8d'
+                },
+                {
+                    'KEY': 3,
+                    'col': '#277f8e'
+                },
+                {
+                    'KEY': 4,
+                    'col': '#1fa288'
+                },
+                {
+                    'KEY': 5,
+                    'col': '#4ac26d'
+                },
+                {
+                    'KEY': 6,
+                    'col': '#9eda39'
+                },
+                {
+                    'KEY': 0,
+                    'col': '#9b9b9b'
+                }
+            ];
+
+            map1.on('load', function () {
+                // add source and layer for museums
+                map1.addSource('chinook', {
+                    'type': 'geojson',
+                    'data': chinook
+                });
+                map1.addSource('sockeye', {
+                    'type': 'geojson',
+                    'data': sockeye
+                });
+                map1.addSource('chum', {
+                    'type': 'geojson',
+                    'data': chum
+                });
+                map1.addSource('coho', {
+                    'type': 'geojson',
+                    'data': coho
+                });
+                map1.addSource('pink', {
+                    'type': 'geojson',
+                    'data': pink
+                });
+
+
+                var matchExpression = ['match', ['get', 'OBJECTID']];
+
+                // Calculate color values for each country based on 'hdi' value
+                attributes.forEach(function (row) {
+                    // Convert the range of data values to a suitable color
+                    //var green = row['col'] * 255;
+                    var color = row['col'];
+
+                    // if (row['OBJECTID'] == 1) {
+                    //     var color = 'rgba(0, 0, 0, 0)'
+                    // }
+                    // else if (row['OBJECTID'] == 2) {
+                    //     var color = 'rgb(39, 137, 240)'
+                    // }
+                    // else if (row['OBJECTID'] == 3) {
+                    //     var color = 'rgb(222, 152, 63)'
+                    // }
+
+                    matchExpression.push(row['OBJECTID'], color);
+                });
+
+                matchExpression.push('rgba(0, 0, 0, 0)');
+                var layers = map1.getStyle().layers;
+                var labels = layers[78].id
+                //console.log(layers)
+
+
+
+                map1.addLayer({
+                    'id': 'chinook',
+                    'type': 'fill',
+                    'source': 'chinook',
+                    'layout': {
+                        // make layer visible by default
+                        'visibility': 'visible'
+                    },
+                    'paint': {
+                        'fill-color': matchExpression
+                    }
+                    //,
+                    ///'source-layer': 'museums'
+                }, labels);
+
+                map1.addLayer({
+                    'id': 'sockeye',
+                    'type': 'fill',
+                    'source': 'sockeye',
+                    'layout': {
+                        // make layer visible by default
+                        'visibility': 'visible'
+                    },
+                    'paint': {
+                        'fill-color': matchExpression
+                    }
+                    //,
+                    ///'source-layer': 'museums'
+                }, labels);
+
+                map1.addLayer({
+                    'id': 'chum',
+                    'type': 'fill',
+                    'source': 'chum',
+                    'layout': {
+                        // make layer visible by default
+                        'visibility': 'visible'
+                    },
+                    'paint': {
+                        'fill-color': matchExpression
+                    }
+                    //,
+                    ///'source-layer': 'museums'
+                }, labels);
+
+                map1.addLayer({
+                    'id': 'coho',
+                    'type': 'fill',
+                    'source': 'coho',
+                    'layout': {
+                        // make layer visible by default
+                        'visibility': 'visible'
+                    },
+                    'paint': {
+                        'fill-color': matchExpression
+                    }
+                    //,
+                    ///'source-layer': 'museums'
+                }, labels);
+
+                map1.addLayer({
+                    'id': 'pink',
+                    'type': 'fill',
+                    'source': 'pink',
+                    'layout': {
+                        // make layer visible by default
+                        'visibility': 'visible'
+                    },
+                    'paint': {
+                        'fill-color': matchExpression
+                    }
+                    //,
+                    ///'source-layer': 'museums'
+                }, labels);
+
+            });
+
+
+            map2.on('load', function () {
+                map2.addSource('Fish Barriers', {
+                    'type': 'geojson',
+                    'data': barriers
+                })
+
+                var matchExpression2 = ['match', ['get', 'KEY']];
+
+                attributes_barriers.forEach(function (row) {
+                    var color = row['col'];
+                    matchExpression2.push(row['KEY'], color);
+                });
+
+                matchExpression2.push('rgba(0, 0, 0, 0)');
+                var layers = map2.getStyle().layers;
+                var labels = layers[78].id
+                console.log(layers)
+                map2.addLayer({
+                    'id': 'Fish Barriers',
+                    'type': 'fill',
+                    'source': 'Fish Barriers',
+                    'layout': {
+                        'visibility': 'visible'
+                    },
+                    paint: {
+                        'fill-color': matchExpression2
+                    }
+                }, labels)
+                map2.resize()
+            })
+
+            map3.on('load', function () {
+                map3.addSource('places', {
+                    'type': 'geojson',
+                    'data': {
+                        'type': 'FeatureCollection',
+                        'features': [{
+                                'type': 'Feature',
+                                'properties': {
+                                    'description': '"Because of the industrial growth of highways, damns, culverts, pollution over the past years, this has damaged a lot of our ecosystem. And the salmon are not going to come back to somewhere where they cannot lay their eggs. And the ecosystem is not just going to fix itself." <br> <i> - David Sigo, Tribal Member and Elder of the Suquamish Tribe'
+                                },
+                                'geometry': {
+                                    'type': 'Point',
+                                    'coordinates': [-122, 47]
+                                }
+                            },
+                            {
+                                'type': 'Feature',
+                                'properties': {
+                                    'description': '"Changing water temperature, but then also a lot of other changes that the water temperature brings, such as changing food supply for the salmon. Warmer waters bring different sea creatures and other organisms that the salmon aren\'t used to eating. And usually with warmer water temperatures, viruses impact things and proliferate more." <br> <i>- Melissa Shirley, Biologist with the Gitanyow Fisheries Authority </i>'
+                                },
+                                'geometry': {
+                                    'type': 'Point',
+                                    'coordinates': [-129.18, 56.03]
+                                }
+                            },
+                            {
+                                'type': 'Feature',
+                                'properties': {
+                                    'description': '"Well, the near future, it is going to be pretty tough. We have got a lot of issues we are facing within the Fraser watershed and the Skeena. We have got declines. What are the -- what factors are contributing to that? We are not entirely sure. Harvest, again, is one of them but there is a number of other factors that we need to have a look at. Including, we have had some really extreme weather events, fires, floods, 100 year floods, 200 year floods, Big Bar slide and I think for the near future it\'s -- wild salmon returns, while they will probably hold on, again, as Indigenous peoples, we just need to take matters into our own hands and protect and recover these fish, and look after them like they looked after generations of people for thousands of years as a food source."<br><i> - Gord Sterritt, Executive Director, Upper Fraser Fisheries Conservation Alliance '
+                                },
+                                'geometry': {
+                                    'type': 'Point',
+                                    'coordinates': [-127.792, 56.184]
+                                }
+                            },
+                            {
+                                'type': 'Feature',
+                                'properties': {
+                                    'description': '"Our economy wasn’t based on paper, it was based on different trade goods. So, it’s hard to explain, so that’s why when we get asked about the economic value of it we can’t because it’s priceless. No amount of money or no amount of gold or any other product would replace the value of these fish" <br> <i> - Wilbur Slockish, Elder from Kickitat Tribe'
+                                },
+                                'geometry': {
+                                    'type': 'Point',
+                                    'coordinates': [-121.94, 45.644]
+                                }
+                            },
+                            {
+                                'type': 'Feature',
+                                'properties': {
+                                    'description': '"And one of the other things that was said was that the commercial fishermen and recreational fishermen always put a dollar value on fish. We don\'t want to put a dollar value on fish. It means more to us than that. One of the sayings that First Nations have -- both in Canada and in the United States -- is that when the last tree is gone, when the last fish is gone, only then will people find out that you can\'t eat money. That\'s something that we have in common with the folks that we work with in the United States is that we have the same kind of belief system because we are family. Because before Canada and the United States existed, we existed, and we had those feelings about fish."<br><i> - Ken Malloway, Chairman of the Lower Fraser Fishers Alliance Vice, President of the First Nations Fisheries Council, Grand Chief'
+                                },
+                                'geometry': {
+                                    'type': 'Point',
+                                    'coordinates': [-122.208, 49.579]
+                                }
+                            },
+                            {
+                                'type': 'Feature',
+                                'properties': {
+                                    'description': '"I remember hearing the elders talk about in the summer how the communities, all the men, would end up moving to the coast and working in canneries and making money in summer away from the community and then coming back to the community for the rest of the year. That doesn\'t happen so much anymore because of the downturn in the commercial fishing. But more recently, DFO has been making licenses available to the inland nations and doing what they call demonstration fisheries when the stocks permit. So the nation I work for, I help them manage and permit, and monitor an economic fishery on the Nass River. When those fisheries are available, it is very important to income to communities that -- you know, Gitanyow, specifically, there would be 8 to 10 people employed for, you know, a month at a time and it brings in important income from year to year" - <br> <i> Mark Cleveland,  Fisheries Biologist for the Gitanyow First Nations '
+                                },
+                                'geometry': {
+                                    'type': 'Point',
+                                    'coordinates': [-128.031, 55.117]
+                                }
+                            },
+                            {
+                                'type': 'Feature',
+                                'properties': {
+                                    'description': '"Healthy water produces healthy fish, and if you don’t have healthy fish then there is decline in the health of our First Nations members." <br> <i> - Cheri Frocklage, Fisheries Director, Tahltan Central Government'
+                                },
+                                'geometry': {
+                                    'type': 'Point',
+                                    'coordinates': [-131.608, 57.962]
+                                }
+                            },
+                            {
+                                'type': 'Feature',
+                                'properties': {
+                                    'description': '"I know that the issue around the introduction of processed foods and foods that we weren\'t used to eating, you know, it has caused some pretty big health concerns. We have a lot of diabetics in our communities, which we didn\'t have before. We do have a fair amount of diabetics within our community and I think that is just more of an introduction to these meats and processed foods and such that people starting consuming more of it and it has led to some pretty big health concerns. We do have people in our community who are in their seventies who eat -- you know, 90% of their diet is wild meat and fish. These people have no problems with diabetes." <br> <i> Cheri Frocklage, Fisheries Director, Tahltan Central Government'
+                                },
+                                'geometry': {
+                                    'type': 'Point',
+                                    'coordinates': [-130, 58.437]
+                                }
+                            },
+                            {
+                                'type': 'Feature',
+                                'properties': {
+                                    'description': '"I think there is obviously a sense of sadness. And I guess a sense of just longing for others to be able to experience what I experienced. A sense of frustration and anger. I wish that there was happier thoughts and happier feelings but I myself haven\'t even been home in three years to be able to process any fish because there hasn\'t been any." <br><i> - Kelsey Campbell, Fraser River Panel Technical Committee/A-Tlegay'
+                                },
+                                'geometry': {
+                                    'type': 'Point',
+                                    'coordinates': [-125.265, 50.035]
+                                }
+                            },
+                            {
+                                'type': 'Feature',
+                                'properties': {
+                                    'description': '"Well, 2020 has been the worst year ever for salmon in living history, living memory. Barely 250,000 fish showed up -- sockeye." <br><i> - Ken Malloway, Chairman of the Lower Fraser Fishers Alliance Vice, President of the First Nations Fisheries Council'
+                                },
+                                'geometry': {
+                                    'type': 'Point',
+                                    'coordinates': [-121.971, 49.14]
+                                }
+                            },
+                            {
+                                'type': 'Feature',
+                                'properties': {
+                                    'description': '"Salmon in our culture, it really is from birth to death." <br><i> - Tracy Wimbush, Scw’exmx Tribal Council'
+                                },
+                                'geometry': {
+                                    'type': 'Point',
+                                    'coordinates': [-120.805, 50.115]
+                                }
+                            },
+
+                            {
+                                'type': 'Feature',
+                                'properties': {
+                                    'description': '"So I think the biggest thing I have learned in my time working for the communities that I work for is that everything is one and everything is interconnected. So for the Nations, you can\'t look at salmon independently. It is woven into all of their beliefs, stories, and practices; it is the foundation of their culture." <br><i> - Nicole Frederickson, IMAWG'
+                                },
+                                'geometry': {
+                                    'type': 'Point',
+                                    'coordinates': [-125.695, 49.59]
+                                }
+                            },
+                            {
+                                'type': 'Feature',
+                                'properties': {
+                                    'description': '"Seeing shifts in other species that are connected to salmon, the salmon that rely on food in the ocean. Maybe there is even connection to the smaller, smaller fish that the salmon eat, like herring. Like, you see a decrease in that in some areas; increase in some areas. The killer whales rely on salmon. So there is things that are connected and it is not just other animals too. There is the salmon -- the contribution that the salmon makes to the forest and ecosystem. It is just everything is connected and one thing that -- the word that came up when I started working with the Nuu-chah-nulth Tribal Council, [indiscernible] council [indiscernible] meeting was Hishook-ish Tsawalk, which means "everything is connected." And it just has total meaning and realization of how everything is connected. And salmon is just one component of it that\'s also very important. Not only culturally and traditionally [indiscernible] but also to the surroundings and environment." <br><i> - Sabrina Crowley,  Biologist with the Nuu-chah-nulth Tribal Council'
+                                },
+                                'geometry': {
+                                    'type': 'Point',
+                                    'coordinates': [-124.845, 49.262]
+                                }
+                            },
+                            {
+                                'type': 'Feature',
+                                'properties': {
+                                    'description': '"I was at a meeting recently when two of the women got up in a meeting and there was probably a hundred people there that represent people on Fraser watershed and the coast fisheries like Kwakwaka\'wakw people and Coast Salish people and Nuu-chah-nulth people. We all met in Kamloops. And two women literally started crying because they just opened their last jar of fish. They are done. They had no dry fish. They weren\'t allowed to dry fish. They were done. They had their last fish. They were literally crying there. And that\'s what I see when, you know, we go to these meetings. I see all the people that go without because of Big Bar, people are going without. And because the fish are not coming back, there are people going without. So it is a pretty big deal and there are so many moving parts. There are so many moving parts when we talk about fish. It is a huge subject." <br><i> - Ken Malloway,  Chairman of the Lower Fraser Fishers Alliance Vice, President of the First Nations Fisheries Council'
+                                },
+                                'geometry': {
+                                    'type': 'Point',
+                                    'coordinates': [-122.151, 51.219]
+                                }
+                            },
+                            {
+                                'type': 'Feature',
+                                'properties': {
+                                    'description': '"So for subsistence our Nation is literally  -- if we didn\'t have fish, we would struggle. Because also you are talking about a lot of our First Nations communities suffer from -- we are poor. A lot of people don\'t have that much money. So buying other food, especially now days, it really helps with saving costs. You just have lots of frozen fish. You are not spending much money on catching it because we have the terminal fisheries. We don\'t have to go on bit ocean trawlers. We just gill net them or dip net them. So we still -- I rely on salmon. If I didn\'t have salmon, I would be a lot poorer than I am right now." <br><i> - Jared Dick, Fisheries Biologist for the Nuu-chah-nulth Tribal Council'
+                                },
+                                'geometry': {
+                                    'type': 'Point',
+                                    'coordinates': [-122.544, 48.419]
+                                }
+                            },
+                            {
+                                'type': 'Feature',
+                                'properties': {
+                                    'description': '"And one of my favorite oral history stories I have heard others talk about and I have seen in reports more recently documented is how traditionally the First Nations inland used to run weirs, for example, and they used to have a head chief that was in charge of a weir on a specific river and they would basically set them up early in the season and the first fish that would arrive, they would let a certain amount of fish through to basically, effectively, see the spawning areas. And it was that traditional chief and his wing chiefs that managed those fisheries and would decide when, you know, they felt enough fish were in the spawning areas so they could go and start harvesting. So it just really demonstrates the long history of sustainable management even before European contact." <br><i> - Mark Cleveland, Fisheries Biologist for the Gitanyow First Nations'
+                                },
+                                'geometry': {
+                                    'type': 'Point',
+                                    'coordinates': [-128.563, 55.268]
+                                }
+                            }
+                        ]
+                    }
+                });
+                map3.addLayer({
+                    'id': 'places',
+                    'type': 'circle',
+                    'source': 'places',
+                    'paint': {
+                        'circle-color': '#000000',
+                        'circle-stroke-color': '#FFFFFF',
+                        'circle-stroke-width': 1.5,
+                        'circle-radius': 3.5
+                    }
+                })
+                var popup = new mapboxgl.Popup({
+                    closeButton: false,
+                    closeOnClick: false
+                });
+
+                map3.on('mouseenter', 'places', function (e) {
+                    // Change the cursor style as a UI indicator.
+                    map3.getCanvas().style.cursor = 'pointer';
+
+                    var coordinates = e.features[0].geometry.coordinates.slice();
+                    var description = e.features[0].properties.description;
+
+                    // Ensure that if the map is zoomed out such that multiple
+                    // copies of the feature are visible, the popup appears
+                    // over the copy being pointed to.
+                    while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                        coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+                    }
+
+                    // Populate the popup and set its coordinates
+                    // based on the feature found.
+                    popup.setLngLat(coordinates).setHTML(description).addTo(map);
+                });
+
+                map3.on('mouseleave', 'places', function () {
+                    map3.getCanvas().style.cursor = '';
+                    popup.remove();
+                });
+                map3.resize()
+            })
+
+            // enumerate ids of the layers
+            var toggleableLayerIds = ['sockeye', 'chinook', 'coho', 'chum', 'pink'];
+
+            // set up the corresponding toggle button for each layer
+            for (var i = 0; i < toggleableLayerIds.length; i++) {
+                var id = toggleableLayerIds[i];
+
+                var link = document.createElement('a');
+                link.href = '#';
+                link.className = 'active';
+                link.textContent = id;
+
+                link.onclick = function (e) {
+                    var clickedLayer = this.textContent;
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    var visibility = map1.getLayoutProperty(clickedLayer, 'visibility');
+
+                    // toggle layer visibility by changing the layout object's visibility property
+                    if (visibility === 'visible') {
+                        map1.setLayoutProperty(clickedLayer, 'visibility', 'none');
+                        this.className = '';
+                    } else {
+                        this.className = 'active';
+                        map1.setLayoutProperty(clickedLayer, 'visibility', 'visible');
+                    }
+                };
+
+                var layers = document.getElementById('menu');
+                layers.appendChild(link);
+            }
+
+            var countyLegendEl = document.getElementById('county-legend');
+            countyLegendEl.style.display = 'block'
+
+
+        </script>
+</body>
+
+</html>
