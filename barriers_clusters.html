@@ -31,7 +31,7 @@
         position: absolute;
         left: 10px;
         z-index: 1;
-        width: 80px;
+        width: 200px;
         }
         
         .legend h4 {
@@ -52,9 +52,13 @@
     <div id="map"></div>
 
     <div id="county-legend" class="legend" style="display: none">
-        <h3>Legend</h3>
+        <h3> Fish Barriers </h3>
+        <h4>Legend</h4>
+        
         <div><span style="background-color: #F4D03F"></span>Culverts</div>
-        <div><span style="background-color: #E74C3C"></span>Dams</div>
+        <div><span style="background-color: #E74C3C"></span>Major Dams</div>
+        <p><i>No culvert data for Yukon Province available</i></p>
+        <p>SOURCES: ADFG, Streamnet, BC Ministry of Environment and Climate Change Strategy, Global Dam Watch</p>
         </div>
 
     <script>
@@ -65,7 +69,8 @@
             style: 'mapbox://styles/alin7138/ckls9hnhw19au17o86le65zws',
             zoom: 3,
             center: [-140, 59],
-            interactive: true
+            interactive: true,
+            maxZoom: 12
         });
 
         map.on('load', function () {

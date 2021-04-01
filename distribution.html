@@ -89,10 +89,12 @@ body { margin: 0; padding: 0; }
 <nav id="menu"></nav>
 <div id="map"></div>
 <div id="county-legend" class="legend" style="display: none">
+    <h3>Salmon Distribution</h3>
     <h4>Legend</h4>
     <div><span style="background-color: #a3b43a"></span>Current spawning distribution</div>
     <div><span style="background-color: #2252a4"></span>Limited spawning distribution</div>
     <div><span style="background-color: #c7c8ca"></span>Historic spawning distribution</div>
+    <p>SOURCE: Wild Salmon Center</p>
     </div>
 
 <script>
@@ -107,7 +109,8 @@ body { margin: 0; padding: 0; }
         style: 'mapbox://styles/alin7138/ckls9hnhw19au17o86le65zws',
         zoom: 3,
         center: [-140, 59],
-        interactive: true
+        interactive: true,
+        maxZoom: 6
     });
 
     var attributes = [
