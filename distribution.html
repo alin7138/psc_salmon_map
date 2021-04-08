@@ -90,6 +90,7 @@ body { margin: 0; padding: 0; }
 <div id="map"></div>
 <div id="county-legend" class="legend" style="display: none">
     <h3>Salmon Distribution</h3>
+    <i>Click on the species name to see its distribution.<br></i>
     <h4>Legend</h4>
     <div><span style="background-color: #a3b43a"></span>Current spawning distribution</div>
     <div><span style="background-color: #2252a4"></span>Limited spawning distribution</div>
@@ -164,7 +165,7 @@ body { margin: 0; padding: 0; }
             'source': 'chinook',
             'layout': {
                 // make layer visible by default
-                'visibility': 'visible'
+                'visibility': 'none'
             },
             'paint': {
                 'fill-color': matchExpression
@@ -179,7 +180,7 @@ body { margin: 0; padding: 0; }
             'source': 'sockeye',
             'layout': {
                 // make layer visible by default
-                'visibility': 'visible'
+                'visibility': 'none'
             },
             'paint': {
                 'fill-color': matchExpression
@@ -194,7 +195,7 @@ body { margin: 0; padding: 0; }
             'source': 'chum',
             'layout': {
                 // make layer visible by default
-                'visibility': 'visible'
+                'visibility': 'none'
             },
             'paint': {
                 'fill-color': matchExpression
@@ -209,7 +210,7 @@ body { margin: 0; padding: 0; }
             'source': 'coho',
             'layout': {
                 // make layer visible by default
-                'visibility': 'visible'
+                'visibility': 'none'
             },
             'paint': {
                 'fill-color': matchExpression
@@ -224,7 +225,7 @@ body { margin: 0; padding: 0; }
             'source': 'pink',
             'layout': {
                 // make layer visible by default
-                'visibility': 'visible'
+                'visibility': 'none'
             },
             'paint': {
                 'fill-color': matchExpression
@@ -239,7 +240,7 @@ body { margin: 0; padding: 0; }
             'source': 'steelhead',
             'layout': {
                 // make layer visible by default
-                'visibility': 'visible'
+                'visibility': 'none'
             },
             'paint': {
                 'fill-color': matchExpression
@@ -259,7 +260,7 @@ body { margin: 0; padding: 0; }
 
         var link = document.createElement('a');
         link.href = '#';
-        link.className = 'active';
+        link.className = '';
         link.textContent = id;
 
         link.onclick = function (e) {
@@ -270,12 +271,12 @@ body { margin: 0; padding: 0; }
             var visibility = map.getLayoutProperty(clickedLayer, 'visibility');
 
             // toggle layer visibility by changing the layout object's visibility property
-            if (visibility === 'visible') {
-                map.setLayoutProperty(clickedLayer, 'visibility', 'none');
-                this.className = '';
-            } else {
-                this.className = 'active';
+            if (visibility === 'none') {
                 map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
+                this.className = 'active';
+            } else {
+                this.className = '';
+                map.setLayoutProperty(clickedLayer, 'visibility', 'none');
             }
         };
 
