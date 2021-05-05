@@ -2,11 +2,12 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>ESA and COSWEIC Status of Salmonids</title>
+<title>ESA and COSEWIC Status of Coho, Chinook, and Sockeye Salmon</title>
 <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
 <link href="https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.css" rel="stylesheet">
 <script src="https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.js"></script>
-<script src='status.js'></script>
+<script src='status_v2.js'></script>
+
 <style>
 body { margin: 0; padding: 0; }
 #map { position: absolute; top: 0; bottom: 0; width: 100%; }
@@ -90,14 +91,11 @@ body { margin: 0; padding: 0; }
 <div id="map"></div>
 <div id="county-legend" class="legend" style="display: none">
     <h3>Listing Status</h3>
-    <i>Click on the species name to see its COSWIC or ESA listing status.<br></i>
+    <i>Click on the species name to see its COSEWIC or ESA listing status.<br></i>
     <h4>Legend</h4>
-    <div><span style="background-color: #3B1F2B"></span>Endangered</div>
-    <div><span style="background-color: #C73E1D"></span>Threatened</div>
-    <div><span style="background-color: #F18F01"></span>Special concern (Canada only)</div>
-    <div><span style="background-color: #2E86AB"></span>Not at risk (Canada only) </div>
-    <div><span style="background-color: #AEB6BF"></span>Data deficient (Canada only) </div>
-    <p><i>No spatial data for steelhead in Canada available</i></p>
+    <div><span style="background-color: #C73E1D"></span>Endangered</div>
+    <div><span style="background-color: #F18F01"></span>Threatened</div>
+
     <p>SOURCE: NOAA, COSEWIC</p>
     </div>
 
@@ -111,18 +109,18 @@ body { margin: 0; padding: 0; }
     var map = new mapboxgl.Map({
         container: 'map',
         style: 'mapbox://styles/alin7138/ckls9hnhw19au17o86le65zws',
-        zoom: 3,
-        center: [-140, 59],
+        zoom: 4.3,
+        center: [-120, 49],
         interactive: true,
         maxZoom: 6
     });
 
     var attributes = [
-        { 'EE_STATUS': 'Endangered', 'col': '#3B1F2B' },
-        { 'EE_STATUS': 'Threatened', 'col': '#C73E1D' },
-        { 'EE_STATUS': 'Special Concern', 'col': '#F18F01' },
-        { 'EE_STATUS': 'Not at Risk', 'col': '#2E86AB' },
-        { 'EE_STATUS': 'Data Deficient', 'col': '#AEB6BF' }
+        { 'EE_STATUS': 'Endangered', 'col': '#C73E1D' },
+        { 'EE_STATUS': 'Threatened', 'col': '#F18F01' }//,
+        // { 'EE_STATUS': 'Special Concern', 'col': '#F18F01' },
+        // { 'EE_STATUS': 'Not at Risk', 'col': '#2E86AB' },
+        // { 'EE_STATUS': 'Data Deficient', 'col': '#AEB6BF' }
     ]; 
 
     map.on('load', function () {
@@ -135,18 +133,18 @@ body { margin: 0; padding: 0; }
             'type': 'geojson',
             'data': sockeye
         });
-        map.addSource('chum', {
-            'type': 'geojson',
-            'data': chum
-        });
+        // map.addSource('chum', {
+        //     'type': 'geojson',
+        //     'data': chum
+        // });
         map.addSource('coho', {
             'type': 'geojson',
             'data': coho
         });
-        map.addSource('steelhead', {
-            'type': 'geojson',
-            'data': steelhead
-        });
+        // map.addSource('steelhead', {
+        //     'type': 'geojson',
+        //     'data': steelhead
+        // });
 
         var matchExpression = ['match', ['get', 'EE_STATUS']];
         attributes.forEach(function (row) {
@@ -189,20 +187,20 @@ body { margin: 0; padding: 0; }
             ///'source-layer': 'museums'
         }, labels);
 
-        map.addLayer({
-            'id': 'Chum',
-            'type': 'fill',
-            'source': 'chum',
-            'layout': {
-                // make layer visible by default
-                'visibility': 'none'
-            },
-            'paint': {
-                'fill-color': matchExpression
-            }
-            //,
-            ///'source-layer': 'museums'
-        }, labels); 
+        // map.addLayer({
+        //     'id': 'Chum',
+        //     'type': 'fill',
+        //     'source': 'chum',
+        //     'layout': {
+        //         // make layer visible by default
+        //         'visibility': 'none'
+        //     },
+        //     'paint': {
+        //         'fill-color': matchExpression
+        //     }
+        //     //,
+        //     ///'source-layer': 'museums'
+        // }, labels); 
 
         map.addLayer({
             'id': 'Coho',
@@ -219,40 +217,41 @@ body { margin: 0; padding: 0; }
             ///'source-layer': 'museums'
         }, labels);
  
-        map.addLayer({
-            'id': 'Pink',
-            'type': 'fill',
-            'source': 'pink',
-            'layout': {
-                // make layer visible by default
-                'visibility': 'none'
-            },
-            'paint': {
-                'fill-color': matchExpression
-            }
-            //,
-            ///'source-layer': 'museums'
-        }, labels);
+        // map.addLayer({
+        //     'id': 'Pink',
+        //     'type': 'fill',
+        //     'source': 'pink',
+        //     'layout': {
+        //         // make layer visible by default
+        //         'visibility': 'none'
+        //     },
+        //     'paint': {
+        //         'fill-color': matchExpression
+        //     }
+        //     //,
+        //     ///'source-layer': 'museums'
+        // }, labels);
 
-        map.addLayer({
-            'id': 'Steelhead',
-            'type': 'fill',
-            'source': 'steelhead',
-            'layout': {
-                // make layer visible by default
-                'visibility': 'none'
-            },
-            'paint': {
-                'fill-color': matchExpression
-            }
-            //,
-            ///'source-layer': 'museums'
-        }, labels);
+        // map.addLayer({
+        //     'id': 'Steelhead',
+        //     'type': 'fill',
+        //     'source': 'steelhead',
+        //     'layout': {
+        //         // make layer visible by default
+        //         'visibility': 'none'
+        //     },
+        //     'paint': {
+        //         'fill-color': matchExpression
+        //     }
+        //     //,
+        //     ///'source-layer': 'museums'
+        // }, labels);
 
     })
 
     // enumerate ids of the layers
-    var toggleableLayerIds = ['Sockeye', 'Chinook', 'Coho', 'Chum','Steelhead'];
+    var toggleableLayerIds = ['Sockeye', 'Chinook', 'Coho'];
+    //var toggleableLayerIds = ['Sockeye', 'Chinook', 'Coho', 'Chum','Steelhead'];
 
     // set up the corresponding toggle button for each layer
     for (var i = 0; i < toggleableLayerIds.length; i++) {
