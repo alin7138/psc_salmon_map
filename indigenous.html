@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Indigenous Territories of the Pacific Salmon Commission Region</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <script src='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css' rel='stylesheet' />
+    <script src="https://unpkg.com/papaparse@latest/papaparse.min.js"></script>
+    <script src="indigenous_federal.js"></script>
+    <script src="indigenous_poly_simplified.js"></script>
+    <script src="IndigenousTerritories_PanelsOnly_id.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .mapboxgl-popup {
+            max-width: 400px;
+            font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+        }
+
+        .mapboxgl-popup {
+            max-width: 400px;
+            font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+        }
+        #position { 
+            position:absolute; top:0; height: 95.5%; width: 320px; 
+            background-color: #154360;
+            padding: 15px;
+            margin: 0px;
+            font: 16px/26px 'Calibri', Arial, Helvetica, sans-serif;
+            color: white
+        }
+        .legend {
+            font: 16px/26px 'Calibri', Arial, Helvetica, sans-serif;
+
+        }
+        .legend div span{
+            
+            display: inline-block;
+            height: 10px;
+            margin-right: 5px;
+            width: 10px;
+            border: px solid #ffffff
+            }
+    #menu {
+        background: #fff;
+        position: absolute;
+        z-index: 1;
+        bottom: 30px;
+        right: 10px;
+        border-radius: 3px;
+        width: 150px;
+        border: 1px solid rgba(0, 0, 0, 0.4);
+        font-family: 'Open Sans', sans-serif;
+
+    }
+
+    #menu a {
+        font-size: 13px;
+        color: #404040;
+        display: block;
+        margin: 0;
+        padding: 0;
+        padding: 10px;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+        text-align: center;
+        top: 20px
+    }
+
+    #menu a:last-child {
+        border: none;
+    }
+    
+    #menu a:hover {
+        background-color: #f8f8f8;
+        color: #404040;
+    }
+    
+    #menu a.active {
+        background-color: #3887be;
+        color: #ffffff;
+    }
+    
+    #menu a.active:hover {
+        background: #3074a4;
+    }
+    </style>
+</head>
+
+<body>
+    <nav id = "menu"></nav>
+    <div id="map"></div>
+    <div id="position">
+        <h2 style = "color:#A4CCE5">Indigenous Territories of the Pacific Salmon Commission Region <br></h2>
+        <hr size = "2" noshade color="#A4CCE5">
+        <body> <br> Hover over the map to see which Indigenous Territories are intersected by the Pacific Salmon Commission’s regional panels. <br> <br> </body>
+        
+        <div id="county-legend" class="legend" >
+            <h4>Legend</h4>
+            <div><span style="background-color: #1F618D; border: 2px solid #ffffff; border-radius: 50%;"></span>First Nation or Tribes</div>
+            <div><span style="background-color: #D7488F; width: 15px"></span>Federally-Designated Lands <i>(American Indian reservations/off-reservation trust lands (US), Indian Reserves (CA), Land Claim Settlement Lands (CA)</i></div>
+            <div><span style="background-color: #FFC500; width: 15px"></span>Territories from Native Land</div>
+        
+            </div>
+
+        <body> <br> <i>SOURCES: <a href = "https://native-land.ca" style = "color:#A4CCE5">native-land.ca</a>,
+            <a href = "https://open.canada.ca/data/en/dataset/b6567c5c-8339-4055-99fa-63f92114d9e4" style = "color:#A4CCE5">Crown-Indigenous Relations and Northern Affairs Canada</a>,
+            <a href = "https://catalog.data.gov/dataset/tiger-line-shapefile-2017-nation-u-s-current-american-indian-tribal-subdivision-aits-national" style = "color:#A4CCE5">US Census Bureau</a></i></body>
+    </div>
+    <script>
+        //YOUR TURN: Replace with your Mapbox Token
+        mapboxgl.accessToken = 'pk.eyJ1IjoiYWxpbjcxMzgiLCJhIjoiY2tvZXlhdWdxMGVpazJwczMxd280a2MxNyJ9.gPyHLyyUuFjNK6ROsXuzog';
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/alin7138/ckiurbisu35ks19nuzht54lsn', //style url 
+            zoom: 3.2,
+            center: [-142, 58],
+            maxZoom: 6
+        });
+        var hoveredStateId = null;
+        map.on('load', function () {
+            
+            map.addSource('Native Lands Territories', {
+                type: 'geojson',
+                data: native_lands
+            });
+            
+            map.addSource('states', {
+                type: 'geojson',
+                data:'https://raw.githubusercontent.com/alin7138/ee_psc_map/main/IndigenousTerritories_PanelsOnly_id.geojson'
+            });
+
+            map.addSource('indigenous_nations', {
+                type: 'geojson',
+                data: indigenous_nations
+            });
+            map.addSource('indigenous_poly', {
+                type: 'geojson',
+                data: indigenous_poly
+            });
+            map.addLayer({
+                'id': 'Native Lands Territories',
+                'type': 'fill',
+                'source': 'Native Lands Territories',
+                'layout': {
+                // make layer visible by default
+                'visibility': 'visible'
+            },
+                    'paint': {
+                        'fill-color': "#FFC500",
+                        'fill-opacity': 0.1,
+                        'fill-outline-color':'#BA9141'
+                }
+            })
+            map.addLayer({
+                'id': 'Federally-Designated Lands',
+                'type': 'fill',
+                'source': 'indigenous_poly',
+                'layout': {
+                // make layer visible by default
+                'visibility': 'visible'
+            },
+                'paint': {
+                    'fill-color': '#D7488F'
+                }
+            })
+            map.addLayer({
+                'id': 'First Nation/Tribes',
+                'type': 'circle',
+                'source': 'indigenous_nations',
+                'layout': {
+                // make layer visible by default
+                'visibility': 'visible'
+            },
+                'paint': {
+                    'circle-color': '#1F618D',
+                    'circle-stroke-color': '#FFFFF0',
+                    'circle-stroke-width': 1.5,
+                    'circle-radius': 4
+                }
+            })
+
+
+
+        });
+
+        var popup = new mapboxgl.Popup({
+            closeButton: false,
+            closeOnClick: true
+        });
+
+        map.on('mousemove',  function (e) {
+
+            map.getCanvas().style.cursor = 'pointer';
+            var content = ''
+            var district = map.queryRenderedFeatures(e.point, { layers: ['Native Lands Territories'] });
+            var list_of_territories = district.length;
+            var i;
+            var content = '<b>' + 'Native Land Territories:' + '</b>' + '<br>';
+            for (i = 0; i < district.length; i++) {
+                var props = district[i].properties;           
+                content += props.Name + '<br>';
+            }
+            popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
+
+            var district = map.queryRenderedFeatures(e.point, { layers: ['First Nation/Tribes'] });
+            var list_of_territories = district.length;
+            var i;
+            content += '<b>' + 'Tribes or First Nation:' + '</b>' + '<br>';
+            for (i = 0; i < district.length; i++) {
+                var props = district[i].properties;           
+                content += props.LABEL + '<br>';
+            }
+            popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
+
+            // var district = map.queryRenderedFeatures(e.point, { layers: ['indigenous_nations'] });
+            // var list_of_territories = district.length;
+            // var i;
+            // content += '<b>' + 'Federally-Designated Territories:' + '</b>' + '<br>';
+            // for (i = 0; i < district.length; i++) {
+            //     var props = district[i].properties;           
+            //     content += props.LABEL + '<br>';
+            // }
+            // popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
+
+            // var district = map.queryRenderedFeatures(e.point, { layers: ['indigenous_poly'] });
+            // var list_of_territories = district.length;
+            // var i;
+            // content += '<b>' + 'Federally-Designated Tribal Lands:' + '</b>' + '<br>';
+            // for (i = 0; i < district.length; i++) {
+            //     var props = district[i].properties;           
+            //     content += props.LABEL + '<br>';
+            // }
+            // popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
+
+ 
+        });
+        map.on('mouseleave', function () {
+            map.getCanvas().style.cursor = '';
+            popup.remove()
+
+        });
+
+
+        map.addControl(new mapboxgl.FullscreenControl());
+
+    // enumerate ids of the layers
+    var toggleableLayerIds = ['First Nation/Tribes', 'Federally-Designated Lands', 'Native Lands Territories'];
+
+    // set up the corresponding toggle button for each layer
+    for (var i = 0; i < toggleableLayerIds.length; i++) {
+        var id = toggleableLayerIds[i];
+
+        var link = document.createElement('a');
+    
+        link.href = '#';
+        link.className = 'active';
+        link.textContent = id;
+        link.id=id
+
+        link.onclick = function (e) {
+            var clickedLayer = this.textContent;
+            e.preventDefault();
+            e.stopPropagation();
+
+            var visibility = map.getLayoutProperty(clickedLayer, 'visibility');
+
+            // toggle layer visibility by changing the layout object's visibility property
+            if (visibility === 'visible') {
+                map.setLayoutProperty(clickedLayer, 'visibility', 'none');
+                this.className = '';
+            } else {
+                this.className = 'active';
+                map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
+            }
+        };
+
+        var layers = document.getElementById('menu');
+        layers.appendChild(link);
+    }
+
+    </script>
+
+</body>
+
+</html>
