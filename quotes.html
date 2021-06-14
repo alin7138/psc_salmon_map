@@ -85,6 +85,9 @@
             interactive: true,
             maxZoom: 6
         });
+        var nav = new mapboxgl.NavigationControl();
+        map.addControl(nav, 'top-right');
+        map.scrollZoom.disable();
 
 
         map.on('load', function () {
