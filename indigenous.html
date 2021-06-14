@@ -132,6 +132,11 @@
             center: [-142, 58],
             maxZoom: 6
         });
+        
+        var nav = new mapboxgl.NavigationControl();
+        map.addControl(nav, 'top-right');
+        map.scrollZoom.disable();
+        
         var hoveredStateId = null;
         map.on('load', function () {
             
